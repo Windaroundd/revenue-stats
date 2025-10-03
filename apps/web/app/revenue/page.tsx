@@ -133,67 +133,34 @@ export default function RevenuePage() {
     );
   };
   const CustomLegend = ({ payload }: any) => {
-    // Define the correct order based on the image
-    const legendOrder = [
-      // Row 1
-      { name: "POS Revenue (Current)", color: "#0f172a" },
-      { name: "Eatclub Revenue (Current)", color: "#6366f1" },
-      { name: "Labour Costs (Current)", color: "#f97316" },
-      { name: "Direct Revenue (Previous)", color: "#94a3b8" },
-      { name: "Total Revenue (Previous)", color: "#c7d2fe" },
-      // Row 2
-      { name: "Labour Costs (Previous)", color: "#fed7aa" },
-      { name: "Positive Event Impact", color: "#22c55e", icon: "↗" },
-      { name: "Negative Event Impact", color: "#ef4444", icon: "↘" },
+    console.log("payload: ", payload);
+
+    // Filter out event impact items and define the correct order
+    const orderedLegendItems = [
+      "POS Revenue (Current)",
+      "Eatclub Revenue (Current)",
+      "Labour Costs (Current)",
+      "Direct Revenue (Previous)",
+      "Total Revenue (Previous)",
+      "Labour Costs (Previous)",
     ];
 
-    // Filter only visible series
-    const visibleLegendItems = legendOrder.filter((item) => {
-      if (item.name.includes("POS Revenue")) return visibleSeries.posRevenue;
-      if (item.name.includes("Eatclub Revenue")) return visibleSeries.eatclubRevenue;
-      if (item.name.includes("Labour Costs")) return visibleSeries.labourCosts;
-      if (item.name.includes("Previous") && !showComparison) return false;
-      if (item.name.includes("Event Impact")) return true; // Always show event indicators
-      return true;
-    });
+    // Filter and sort payload according to the desired order
+    const filteredPayload = orderedLegendItems
+      .map((name) => payload.find((entry: any) => entry.value === name))
+      .filter(Boolean);
 
     return (
-      <div className="flex flex-col items-center gap-3 pt-5">
-        {/* Row 1 */}
-        <div className="flex justify-center gap-5 items-center">
-          {visibleLegendItems.slice(0, 5).map((item, index) => (
-            <div key={index} className="flex items-center gap-1.5">
-              {item.icon ? (
-                <span className="text-lg">{item.icon}</span>
-              ) : (
-                <span
-                  className="inline-block w-3.5 h-3.5 rounded-full"
-                  style={{ backgroundColor: item.color }}
-                ></span>
-              )}
-              <span className="text-base text-slate-600">{item.name}</span>
-            </div>
-          ))}
-        </div>
-        
-        {/* Row 2 */}
-        {visibleLegendItems.length > 5 && (
-          <div className="flex justify-center gap-5 items-center">
-            {visibleLegendItems.slice(5).map((item, index) => (
-              <div key={index + 5} className="flex items-center gap-1.5">
-                {item.icon ? (
-                  <span className="text-lg">{item.icon}</span>
-                ) : (
-                  <span
-                    className="inline-block w-3.5 h-3.5 rounded-full"
-                    style={{ backgroundColor: item.color }}
-                  ></span>
-                )}
-                <span className="text-base text-slate-600">{item.name}</span>
-              </div>
-            ))}
+      <div className="flex justify-center gap-5 pt-5 items-center flex-wrap">
+        {filteredPayload.map((entry: any, index: number) => (
+          <div key={index} className="flex items-center gap-1.5">
+            <span
+              className="inline-block w-3.5 h-3.5 rounded-full"
+              style={{ backgroundColor: entry.color }}
+            ></span>
+            <span className="text-base text-slate-600">{entry.value}</span>
           </div>
-        )}
+        ))}
       </div>
     );
   };

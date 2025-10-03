@@ -15,7 +15,9 @@ const getWeekNumber = (date: Date): number => {
 };
 
 // Helper function to get day of week
-const getDayOfWeek = (date: Date): "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun" => {
+const getDayOfWeek = (
+  date: Date
+): "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun" => {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
   const day = days[date.getDay()];
   if (!day) throw new Error("Invalid day");
@@ -34,8 +36,14 @@ export const createRevenueData = async (
       return;
     }
 
-    const { date, posRevenue, eatclubRevenue, labourCosts, totalCovers, events } =
-      req.body;
+    const {
+      date,
+      posRevenue,
+      eatclubRevenue,
+      labourCosts,
+      totalCovers,
+      events,
+    } = req.body;
 
     // Debug: Log received data
     console.log("Received request body:", req.body);
@@ -49,7 +57,9 @@ export const createRevenueData = async (
     // Check if data already exists for this date
     const existingData = await RevenueDataModel.findOne({ date: dateObj });
     if (existingData) {
-      res.status(409).json({ error: "Revenue data already exists for this date" });
+      res
+        .status(409)
+        .json({ error: "Revenue data already exists for this date" });
       return;
     }
 
@@ -82,7 +92,14 @@ export const getRevenueData = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { year, weekNumber, startDate, endDate, page = 1, limit = 100 } = req.query;
+    const {
+      year,
+      weekNumber,
+      startDate,
+      endDate,
+      page = 1,
+      limit = 100,
+    } = req.query;
 
     // Build query
     const query: Record<string, unknown> = {};
@@ -98,10 +115,14 @@ export const getRevenueData = async (
     if (startDate || endDate) {
       query.date = {};
       if (startDate) {
-        (query.date as Record<string, unknown>).$gte = new Date(startDate as string);
+        (query.date as Record<string, unknown>).$gte = new Date(
+          startDate as string
+        );
       }
       if (endDate) {
-        (query.date as Record<string, unknown>).$lte = new Date(endDate as string);
+        (query.date as Record<string, unknown>).$lte = new Date(
+          endDate as string
+        );
       }
     }
 
@@ -163,7 +184,8 @@ export const updateRevenueData = async (
     }
 
     const { id } = req.params;
-    const { posRevenue, eatclubRevenue, labourCosts, totalCovers, events } = req.body;
+    const { posRevenue, eatclubRevenue, labourCosts, totalCovers, events } =
+      req.body;
 
     const revenueData = await RevenueDataModel.findById(id);
 
@@ -174,7 +196,8 @@ export const updateRevenueData = async (
 
     // Update fields
     if (posRevenue !== undefined) revenueData.posRevenue = posRevenue;
-    if (eatclubRevenue !== undefined) revenueData.eatclubRevenue = eatclubRevenue;
+    if (eatclubRevenue !== undefined)
+      revenueData.eatclubRevenue = eatclubRevenue;
     if (labourCosts !== undefined) revenueData.labourCosts = labourCosts;
     if (totalCovers !== undefined) revenueData.totalCovers = totalCovers;
     if (events !== undefined) revenueData.events = events;

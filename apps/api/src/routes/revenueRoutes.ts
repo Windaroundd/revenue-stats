@@ -33,23 +33,7 @@ const createRevenueValidation = [
   body("totalCovers")
     .isInt({ min: 0 })
     .withMessage("Total Covers must be a positive integer"),
-  body("events")
-    .optional()
-    .isArray()
-    .withMessage("Events must be an array")
-    .custom((events) => {
-      if (events && events.length > 0) {
-        for (const event of events) {
-          if (!event.name || typeof event.name !== 'string') {
-            throw new Error('Event name is required and must be a string');
-          }
-          if (!event.impact || !['positive', 'negative'].includes(event.impact)) {
-            throw new Error('Event impact must be either "positive" or "negative"');
-          }
-        }
-      }
-      return true;
-    }),
+  body("events").optional().isArray().withMessage("Events must be an array"),
 ];
 
 const updateRevenueValidation = [

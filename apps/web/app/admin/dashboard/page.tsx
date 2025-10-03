@@ -128,7 +128,6 @@ export default function AdminDashboardPage() {
   };
 
   const handleOpenDialog = (item?: RevenueData) => {
-    
     if (item) {
       setEditingItem(item);
       const dateStr = new Date(item.date).toISOString().split("T")[0];
@@ -161,13 +160,16 @@ export default function AdminDashboardPage() {
       const submitData = {
         ...formData,
         // Only include events if there are any
-        events: formData.events && formData.events.length > 0 ? formData.events : undefined,
+        events:
+          formData.events && formData.events.length > 0
+            ? formData.events
+            : undefined,
       };
-      
+
       // Debug: Log the form data being sent
       console.log("Form data being submitted:", submitData);
       console.log("Events in submitData:", submitData.events);
-      
+
       if (editingItem) {
         await revenueService.updateRevenueData(editingItem._id, submitData);
       } else {
@@ -199,16 +201,13 @@ export default function AdminDashboardPage() {
         name: eventInput.name,
         impact: eventInput.impact,
       };
-      
+
       setFormData((prev) => {
-        const updatedEvents = [
-          ...(prev.events || []),
-          newEvent,
-        ];
-        
+        const updatedEvents = [...(prev.events || []), newEvent];
+
         console.log("Adding event:", newEvent);
         console.log("Updated events:", updatedEvents);
-        
+
         return {
           ...prev,
           events: updatedEvents,
@@ -417,7 +416,7 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
 
-                    {/* Events Section */}
+                    {/* Events Section
                     <div className="space-y-2">
                       <Label>Events (Optional)</Label>
                       <div className="flex gap-2">
@@ -491,7 +490,7 @@ export default function AdminDashboardPage() {
                           )}
                         </div>
                       )}
-                    </div>
+                    </div> */}
 
                     <DialogFooter>
                       <Button
