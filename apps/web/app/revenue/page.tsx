@@ -40,6 +40,7 @@ export default function RevenuePage() {
     try {
       setLoading(true);
       const response = await analyticsService.getCurrentWeekAnalytics();
+
       setData(response);
     } catch (error) {
       console.error("Failed to load analytics:", error);
@@ -121,11 +122,26 @@ export default function RevenuePage() {
         {payload.map((entry, index) => (
           <div key={index} className="flex items-center gap-2 text-sm">
             <div
-              className="w-3 h-3 rounded"
+              className="w-3 h-3 rounded-full"
               style={{ backgroundColor: entry.color }}
             />
             <span className="text-slate-600">{entry.name}:</span>
             <span className="font-medium">{formatCurrency(entry.value)}</span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+  const CustomLegend = ({ payload }: any) => {
+    return (
+      <div className="flex justify-center gap-5 pt-5 items-center">
+        {payload.map((entry: any, index: number) => (
+          <div key={index} className="flex items-center gap-1.5">
+            <span
+              className="inline-block w-3.5 h-3.5 rounded-full"
+              style={{ backgroundColor: entry.color }}
+            ></span>
+            <span className="text-base text-slate-600">{entry.value}</span>
           </div>
         ))}
       </div>
@@ -159,11 +175,11 @@ export default function RevenuePage() {
 
   return (
     <div className="min-h-screen bg-slate-50 p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-[90rem] mx-auto space-y-6 rounded-xl border border-slate-200 bg-white text-slate-950 shadow dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 p-4">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between ">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">
+            <h1 className="text-3xl font-bold text-slate-900 mb-2 max-w-[25rem]">
               {showComparison
                 ? "This Week's Revenue Trend vs Previous Period"
                 : "This Week's Revenue Trend"}
@@ -172,9 +188,73 @@ export default function RevenuePage() {
               Week {data.currentWeek.weekNumber}, {data.currentWeek.year}
             </p>
           </div>
-          <div className="flex gap-3">
+
+          {/* Legend Controls */}
+          <div className="">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="pos"
+                  checked={visibleSeries.posRevenue}
+                  onCheckedChange={(checked: boolean) =>
+                    setVisibleSeries((prev) => ({
+                      ...prev,
+                      posRevenue: !!checked,
+                    }))
+                  }
+                />
+                <Label
+                  htmlFor="pos"
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <div className="w-6 h-1 bg-black rounded" />
+                  POS Revenue
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="eatclub"
+                  checked={visibleSeries.eatclubRevenue}
+                  onCheckedChange={(checked: boolean) =>
+                    setVisibleSeries((prev) => ({
+                      ...prev,
+                      eatclubRevenue: !!checked,
+                    }))
+                  }
+                />
+                <Label
+                  htmlFor="eatclub"
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <div className="w-6 h-1 bg-indigo-500 rounded" />
+                  Eatclub Revenue
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="labour"
+                  checked={visibleSeries.labourCosts}
+                  onCheckedChange={(checked: boolean) =>
+                    setVisibleSeries((prev) => ({
+                      ...prev,
+                      labourCosts: !!checked,
+                    }))
+                  }
+                />
+                <Label
+                  htmlFor="labour"
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <div className="w-6 h-1 bg-orange-500 rounded" />
+                  Labour Costs
+                </Label>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-3 items-center">
             <Button
-              variant={showComparison ? "default" : "outline"}
+              variant={showComparison ? "compare_default" : "compare_outline"}
               onClick={() => setShowComparison(!showComparison)}
               className="gap-2"
             >
@@ -188,164 +268,108 @@ export default function RevenuePage() {
           </div>
         </div>
 
-        {/* Legend Controls */}
-        <Card className="p-4">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="pos"
-                checked={visibleSeries.posRevenue}
-                onCheckedChange={(checked: boolean) =>
-                  setVisibleSeries((prev) => ({
-                    ...prev,
-                    posRevenue: !!checked,
-                  }))
-                }
-              />
-              <Label
-                htmlFor="pos"
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <div className="w-4 h-4 bg-black rounded" />
-                POS Revenue
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="eatclub"
-                checked={visibleSeries.eatclubRevenue}
-                onCheckedChange={(checked: boolean) =>
-                  setVisibleSeries((prev) => ({
-                    ...prev,
-                    eatclubRevenue: !!checked,
-                  }))
-                }
-              />
-              <Label
-                htmlFor="eatclub"
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <div className="w-4 h-4 bg-indigo-500 rounded" />
-                Eatclub Revenue
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="labour"
-                checked={visibleSeries.labourCosts}
-                onCheckedChange={(checked: boolean) =>
-                  setVisibleSeries((prev) => ({
-                    ...prev,
-                    labourCosts: !!checked,
-                  }))
-                }
-              />
-              <Label
-                htmlFor="labour"
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <div className="w-4 h-4 bg-orange-500 rounded" />
-                Labour Costs
-              </Label>
-            </div>
-          </div>
-        </Card>
-
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="p-6">
+          <div className="p-4 bg-gray-100 rounded-xl">
             <div className="space-y-2">
-              <p className="text-sm text-slate-600">Total Revenue</p>
-              <p className="text-3xl font-bold text-slate-900">
-                {formatCurrency(currentStats.totalRevenue)}
-              </p>
-              {showComparison && data.previousWeek && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-600">
-                    vs {formatCurrency(data.previousWeek.stats.totalRevenue)}
-                  </span>
-                  <span
-                    className={`text-sm font-medium flex items-center gap-1 ${
-                      comparison.totalRevenueChange >= 0
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {comparison.totalRevenueChange >= 0 ? (
-                      <TrendingUp className="w-4 h-4" />
-                    ) : (
-                      <TrendingDown className="w-4 h-4" />
-                    )}
-                    {formatPercentage(comparison.totalRevenueChange)}
-                  </span>
-                </div>
-              )}
+              <p className="text-base text-slate-600">Total Revenue</p>
+              <div className="flex gap-3 items-center">
+                <p className="text-3xl font-bold text-slate-900">
+                  {formatCurrency(currentStats.totalRevenue)}
+                </p>
+                {showComparison && data.previousWeek && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-base text-slate-600">
+                      vs {formatCurrency(data.previousWeek.stats.totalRevenue)}
+                    </span>
+                    <span
+                      className={`text-base font-medium flex items-center gap-1 ${
+                        comparison.totalRevenueChange >= 0
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      ({formatPercentage(comparison.totalRevenueChange)})
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-          </Card>
+          </div>
 
-          <Card className="p-6">
+          <div className="p-4 bg-gray-100 rounded-xl">
             <div className="space-y-2">
-              <p className="text-sm text-slate-600">Average per Day</p>
-              <p className="text-3xl font-bold text-slate-900">
-                {formatCurrency(currentStats.averagePerDay)}
-              </p>
-              {showComparison && data.previousWeek && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-600">
-                    vs {formatCurrency(data.previousWeek.stats.averagePerDay)}
-                  </span>
-                  <span
-                    className={`text-sm font-medium flex items-center gap-1 ${
-                      comparison.averagePerDayChange >= 0
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {comparison.averagePerDayChange >= 0 ? (
-                      <TrendingUp className="w-4 h-4" />
-                    ) : (
-                      <TrendingDown className="w-4 h-4" />
-                    )}
-                    {formatPercentage(comparison.averagePerDayChange)}
-                  </span>
-                </div>
-              )}
+              <p className="text-base text-slate-600">Average per Day</p>
+              <div className="flex gap-3 items-center">
+                <p className="text-3xl font-bold text-slate-900">
+                  {formatCurrency(currentStats.averagePerDay)}
+                </p>
+                {showComparison && data.previousWeek && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-base text-slate-600">
+                      vs {formatCurrency(data.previousWeek.stats.averagePerDay)}
+                    </span>
+                    <span
+                      className={`text-base font-medium flex items-center gap-1 ${
+                        comparison.averagePerDayChange >= 0
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      <span
+                        className={`text-base font-medium flex items-center gap-1 ${
+                          comparison.totalRevenueChange >= 0
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        ({formatPercentage(comparison.averagePerDayChange)})
+                      </span>
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-          </Card>
+          </div>
 
-          <Card className="p-6">
+          <div className="p-4 bg-gray-100 rounded-xl">
             <div className="space-y-2">
-              <p className="text-sm text-slate-600">Total Covers</p>
-              <p className="text-3xl font-bold text-slate-900">
-                {formatNumber(currentStats.totalCovers)}
-              </p>
-              {showComparison && data.previousWeek && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-600">
-                    vs {formatNumber(data.previousWeek.stats.totalCovers)}
-                  </span>
-                  <span
-                    className={`text-sm font-medium flex items-center gap-1 ${
-                      comparison.totalCoversChange >= 0
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {comparison.totalCoversChange >= 0 ? (
-                      <TrendingUp className="w-4 h-4" />
-                    ) : (
-                      <TrendingDown className="w-4 h-4" />
-                    )}
-                    {formatPercentage(comparison.totalCoversChange)}
-                  </span>
-                </div>
-              )}
+              <p className="text-base text-slate-600">Total Covers</p>
+              <div className="flex gap-3 items-center">
+                <p className="text-3xl font-bold text-slate-900">
+                  {formatNumber(currentStats.totalCovers)}
+                </p>
+                {showComparison && data.previousWeek && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-base text-slate-600">
+                      vs {formatNumber(data.previousWeek.stats.totalCovers)}
+                    </span>
+                    <span
+                      className={`text-base font-medium flex items-center gap-1 ${
+                        comparison.totalCoversChange >= 0
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      <span
+                        className={`text-base font-medium flex items-center gap-1 ${
+                          comparison.totalRevenueChange >= 0
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        ({formatPercentage(comparison.totalCoversChange)})
+                      </span>
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-          </Card>
+          </div>
         </div>
 
         {/* Chart */}
-        <Card ref={chartRef} className="p-6">
+        <div ref={chartRef} className="p-6">
           <CardContent className="p-0">
             <ResponsiveContainer width="100%" height={500}>
               <BarChart data={chartData} barGap={0} barCategoryGap="20%">
@@ -361,7 +385,7 @@ export default function RevenuePage() {
                   tickFormatter={(value) => `$${(value / 1000).toFixed(1)}k`}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ paddingTop: "20px" }} iconType="rect" />
+                <Legend content={<CustomLegend />} />
 
                 {/* Current Week Bars */}
                 {visibleSeries.posRevenue && (
@@ -427,7 +451,7 @@ export default function RevenuePage() {
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
-        </Card>
+        </div>
 
         {/* Events Legend */}
         <div className="flex items-center gap-6 text-sm">
