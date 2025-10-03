@@ -29,6 +29,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { revenueService } from "@/app/lib/services/revenueService";
 import type { RevenueData, CreateRevenueRequest } from "@/app/types/api";
 import { isAuthenticated, clearAuthData } from "@/app/lib/utils/auth";
@@ -49,6 +58,12 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<RevenueData | null>(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [formData, setFormData] = useState<CreateRevenueRequest>({
     date: "",
     posRevenue: 0,
@@ -67,17 +82,36 @@ export default function AdminDashboardPage() {
     loadRevenueData();
   }, []);
 
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    loadRevenueData(page, pageSize);
+  };
+
+  // Handle page size change
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1);
+    loadRevenueData(1, newPageSize);
+  };
+
   const checkAuth = () => {
     if (!isAuthenticated()) {
       router.push("/admin/login");
     }
   };
 
-  const loadRevenueData = async () => {
+  const loadRevenueData = async (page: number = currentPage, size: number = pageSize) => {
     try {
       setLoading(true);
-      const response = await revenueService.getRevenueData({ limit: 100 });
+      const response = await revenueService.getRevenueData({ 
+        page, 
+        limit: size 
+      });
       setRevenueData(response.data);
+      setTotalRecords(response.pagination.total);
+      setTotalPages(response.pagination.pages);
+      setCurrentPage(response.pagination.page);
     } catch (error) {
       console.error("Failed to load revenue data:", error);
     } finally {
@@ -125,7 +159,7 @@ export default function AdminDashboardPage() {
         await revenueService.createRevenueData(formData);
       }
       setDialogOpen(false);
-      loadRevenueData();
+      loadRevenueData(currentPage, pageSize);
     } catch (error) {
       console.error("Failed to save revenue data:", error);
       alert("Failed to save data. Please try again.");
@@ -137,7 +171,7 @@ export default function AdminDashboardPage() {
 
     try {
       await revenueService.deleteRevenueData(id);
-      loadRevenueData();
+      loadRevenueData(currentPage, pageSize);
     } catch (error) {
       console.error("Failed to delete revenue data:", error);
       alert("Failed to delete data. Please try again.");
@@ -209,9 +243,35 @@ export default function AdminDashboardPage() {
               <h2 className="text-2xl font-bold text-slate-900">
                 Revenue Records
               </h2>
-              <p className="text-slate-600">Manage daily revenue data</p>
+              <p className="text-slate-600">
+                Manage daily revenue data
+                {totalRecords > 0 && (
+                  <span className="ml-2 text-sm">
+                    ({totalRecords} total records)
+                  </span>
+                )}
+              </p>
             </div>
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <div className="flex items-center gap-4">
+              {/* Page Size Selector */}
+              <div className="flex items-center gap-2">
+                <Label htmlFor="pageSize" className="text-sm text-slate-600">
+                  Show:
+                </Label>
+                <select
+                  id="pageSize"
+                  value={pageSize}
+                  onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                  className="border border-slate-200 rounded-md px-2 py-1 text-sm"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger
                 onClick={() => handleOpenDialog()}
                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-slate-900 text-slate-50 shadow hover:bg-slate-900/90 h-9 px-4 py-2"
@@ -414,6 +474,7 @@ export default function AdminDashboardPage() {
                 </form>
               </DialogContent>
             </Dialog>
+            </div>
           </div>
 
           {/* Data Table */}
@@ -494,6 +555,67 @@ export default function AdminDashboardPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-slate-600">
+                Showing {((currentPage - 1) * pageSize) + 1} to{" "}
+                {Math.min(currentPage * pageSize, totalRecords)} of{" "}
+                {totalRecords} results
+              </div>
+              
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  
+                  {/* Page Numbers */}
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <PaginationItem key={pageNum}>
+                        <PaginationLink
+                          onClick={() => handlePageChange(pageNum)}
+                          isActive={currentPage === pageNum}
+                          className="cursor-pointer"
+                        >
+                          {pageNum}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+                  
+                  {totalPages > 5 && currentPage < totalPages - 2 && (
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )}
+                  
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </div>
       </main>
     </div>
