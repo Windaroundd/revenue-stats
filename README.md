@@ -2,6 +2,28 @@
 
 Complete guide to set up and run this project locally on Linux/macOS from scratch.
 
+## Tech Stack
+
+### Frontend
+![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=for-the-badge&logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/React-19.1-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-4.1-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Recharts](https://img.shields.io/badge/Recharts-3.2-8884D8?style=for-the-badge)
+
+### Backend
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-4.21-000000?style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-7.0-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![Mongoose](https://img.shields.io/badge/Mongoose-8.7-880000?style=for-the-badge)
+![JWT](https://img.shields.io/badge/JWT-9.0-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white)
+![Swagger](https://img.shields.io/badge/Swagger-6.2-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
+
+### DevOps & Tools
+![Turborepo](https://img.shields.io/badge/Turborepo-2.5-EF4444?style=for-the-badge&logo=turborepo&logoColor=white)
+![ESLint](https://img.shields.io/badge/ESLint-9.34-4B32C3?style=for-the-badge&logo=eslint&logoColor=white)
+![Prettier](https://img.shields.io/badge/Prettier-3.6-F7B93E?style=for-the-badge&logo=prettier&logoColor=black)
+
 ## Prerequisites
 
 ### 1. Install Node.js and npm
