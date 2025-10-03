@@ -1,135 +1,310 @@
-# Turborepo starter
+# Restaurant Revenue Analytics - Local Installation Guide
 
-This Turborepo starter is maintained by the Turborepo core team.
+Complete guide to set up and run this project locally on Linux/macOS from scratch.
 
-## Using this example
+## Prerequisites
 
-Run the following command:
+### 1. Install Node.js and npm
 
-```sh
-npx create-turbo@latest
+**macOS (using Homebrew):**
+```bash
+# Install Homebrew if not already installed
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install Node.js (includes npm)
+brew install node@18
 ```
 
-## What's inside?
+**Linux (Ubuntu/Debian):**
+```bash
+# Update package index
+sudo apt update
 
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
+# Install Node.js 18.x
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
 ```
+
+**Verify installation:**
+```bash
+node --version  # Should be >= 18.x
+npm --version   # Should be >= 10.9.2
+```
+
+### 2. Install MongoDB
+
+**macOS:**
+```bash
+# Install MongoDB Community Edition
+brew tap mongodb/brew
+brew install mongodb-community@7.0
+
+# Start MongoDB service
+brew services start mongodb-community@7.0
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+# Import MongoDB public GPG key
+curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
+
+# Add MongoDB repository
+echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+
+# Install MongoDB
+sudo apt-get update
+sudo apt-get install -y mongodb-org
+
+# Start MongoDB service
+sudo systemctl start mongod
+sudo systemctl enable mongod
+```
+
+**Verify MongoDB is running:**
+```bash
+mongosh --eval "db.runCommand({ ping: 1 })"
+```
+
+## Project Setup
+
+### 1. Clone and Install Dependencies
+
+```bash
+# Navigate to project directory
 cd my-turborepo
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+# Install all dependencies (monorepo-wide)
+npm install
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+### 2. Configure Environment Variables
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+**API Configuration:**
+```bash
+# Create environment file for API
+cat > apps/api/.env << 'EOF'
+# Server Configuration
+PORT=3214
+NODE_ENV=development
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+# Database Configuration
+MONGODB_URI=mongodb://localhost:27017/restaurant-analytics
 
-### Develop
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_EXPIRES_IN=7d
 
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+# CORS Configuration (optional)
+CORS_ORIGIN=http://localhost:3000
+EOF
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
+**Web Configuration:**
+```bash
+# Create environment file for web app
+cat > apps/web/.env.local << 'EOF'
+# API Configuration
+NEXT_PUBLIC_API_URL=http://localhost:3214/api
+EOF
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
+
+**Important:** Change `JWT_SECRET` to a secure random string in production.
+
+### 3. Initialize Database
+
+**Seed the database with initial data:**
+```bash
+cd apps/api
+npm run seed
+cd ../..
+```
+
+This creates:
+- Default admin user (credentials will be shown in console output)
+- Sample revenue data for testing
+
+## Running the Application
+
+### Development Mode (Recommended)
+
+**Start all services:**
+```bash
+# From project root - runs both API and web app
+npm run dev
+```
+
+This starts:
+- API server: http://localhost:3214
+- Web app: http://localhost:3000
+- API documentation: http://localhost:3214/api-docs
+
+**Start individual services:**
+```bash
+# API only
+turbo dev --filter=api
+
+# Web app only
 turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
 ```
 
-### Remote Caching
+### Production Build
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+```bash
+# Build all apps
+npm run build
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+# Start API in production mode
+cd apps/api
+npm start
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+# Start web app in production mode
+cd apps/web
+npm start
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+## Verify Installation
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+### 1. Check API Health
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+```bash
+curl http://localhost:3214/api/health
+# Expected: {"status":"OK","timestamp":"..."}
 ```
 
-## Useful Links
+### 2. Access Swagger Documentation
 
-Learn more about the power of Turborepo:
+Open browser: http://localhost:3214/api-docs
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+### 3. Access Web Application
+
+Open browser: http://localhost:3000
+
+### 4. Test Admin Login
+
+Use credentials from the seed script output to log in at:
+http://localhost:3000/admin/login
+
+## Database Management
+
+### View Database Contents
+
+```bash
+# Connect to MongoDB shell
+mongosh
+
+# Switch to database
+use restaurant-analytics
+
+# View collections
+show collections
+
+# View admin users
+db.admins.find().pretty()
+
+# View revenue data
+db.revenuedata.find().limit(5).pretty()
+
+# Exit
+exit
+```
+
+### Reset Database
+
+```bash
+# Drop database and re-seed
+mongosh restaurant-analytics --eval "db.dropDatabase()"
+cd apps/api
+npm run seed
+```
+
+## Development Commands
+
+### Linting
+```bash
+npm run lint
+```
+
+### Type Checking
+```bash
+npm run check-types
+```
+
+### Code Formatting
+```bash
+npm run format
+```
+
+## Troubleshooting
+
+### MongoDB Connection Issues
+
+**Error: "MongooseServerSelectionError"**
+```bash
+# Check if MongoDB is running
+sudo systemctl status mongod  # Linux
+brew services list | grep mongodb  # macOS
+
+# Restart MongoDB
+sudo systemctl restart mongod  # Linux
+brew services restart mongodb-community  # macOS
+```
+
+### Port Already in Use
+
+**Error: "EADDRINUSE: address already in use :::3214"**
+```bash
+# Find and kill process using port 3214
+lsof -ti:3214 | xargs kill -9
+
+# Or use a different port in apps/api/.env
+PORT=3215
+```
+
+### Module Not Found Errors
+
+```bash
+# Clean install all dependencies
+rm -rf node_modules apps/*/node_modules packages/*/node_modules
+npm install
+```
+
+### Build Errors
+
+```bash
+# Clean Turborepo cache
+rm -rf .turbo apps/*/.turbo packages/*/.turbo
+
+# Rebuild
+npm run build
+```
+
+## Project Structure
+
+```
+my-turborepo/
+├── apps/
+│   ├── api/          # Express.js REST API (port 3214)
+│   └── web/          # Next.js frontend (port 3000)
+├── packages/
+│   ├── ui/           # Shared React components
+│   ├── eslint-config/
+│   └── typescript-config/
+└── turbo.json        # Turborepo configuration
+```
+
+## Default Credentials
+
+After seeding, check the console output for admin credentials, typically:
+- **Email:** admin@restaurant.com
+- **Password:** (generated during seed)
+
+## Next Steps
+
+1. Review API documentation at http://localhost:3214/api-docs
+2. Explore the admin dashboard at http://localhost:3000/admin
+3. Check revenue analytics at http://localhost:3000/revenue
+4. Review [CLAUDE.md](./CLAUDE.md) for development guidelines
+
+## Support
+
+For issues or questions, refer to the troubleshooting section above or check the application logs
