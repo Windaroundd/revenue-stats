@@ -58,7 +58,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<RevenueData | null>(null);
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -101,12 +101,15 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const loadRevenueData = async (page: number = currentPage, size: number = pageSize) => {
+  const loadRevenueData = async (
+    page: number = currentPage,
+    size: number = pageSize
+  ) => {
     try {
       setLoading(true);
-      const response = await revenueService.getRevenueData({ 
-        page, 
-        limit: size 
+      const response = await revenueService.getRevenueData({
+        page,
+        limit: size,
       });
       setRevenueData(response.data);
       setTotalRecords(response.pagination.total);
@@ -125,6 +128,7 @@ export default function AdminDashboardPage() {
   };
 
   const handleOpenDialog = (item?: RevenueData) => {
+    
     if (item) {
       setEditingItem(item);
       const dateStr = new Date(item.date).toISOString().split("T")[0];
@@ -153,10 +157,21 @@ export default function AdminDashboardPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Prepare data for submission
+      const submitData = {
+        ...formData,
+        // Only include events if there are any
+        events: formData.events && formData.events.length > 0 ? formData.events : undefined,
+      };
+      
+      // Debug: Log the form data being sent
+      console.log("Form data being submitted:", submitData);
+      console.log("Events in submitData:", submitData.events);
+      
       if (editingItem) {
-        await revenueService.updateRevenueData(editingItem._id, formData);
+        await revenueService.updateRevenueData(editingItem._id, submitData);
       } else {
-        await revenueService.createRevenueData(formData);
+        await revenueService.createRevenueData(submitData);
       }
       setDialogOpen(false);
       loadRevenueData(currentPage, pageSize);
@@ -180,16 +195,25 @@ export default function AdminDashboardPage() {
 
   const handleAddEvent = () => {
     if (eventInput.name.trim()) {
-      setFormData((prev) => ({
-        ...prev,
-        events: [
+      const newEvent = {
+        name: eventInput.name,
+        impact: eventInput.impact,
+      };
+      
+      setFormData((prev) => {
+        const updatedEvents = [
           ...(prev.events || []),
-          {
-            name: eventInput.name,
-            impact: eventInput.impact,
-          },
-        ],
-      }));
+          newEvent,
+        ];
+        
+        console.log("Adding event:", newEvent);
+        console.log("Updated events:", updatedEvents);
+        
+        return {
+          ...prev,
+          events: updatedEvents,
+        };
+      });
       setEventInput({ name: "", impact: "positive" });
     }
   };
@@ -272,56 +296,35 @@ export default function AdminDashboardPage() {
                 </select>
               </div>
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger
-                onClick={() => handleOpenDialog()}
-                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-slate-900 text-slate-50 shadow hover:bg-slate-900/90 h-9 px-4 py-2"
-              >
-                <Plus className="w-4 h-4" />
-                Add Revenue Data
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingItem ? "Edit Revenue Data" : "Add Revenue Data"}
-                  </DialogTitle>
-                  <DialogDescription>
-                    Enter the revenue details for a specific date
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="date">Date</Label>
-                    <div className="relative">
-                      <Calendar className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                      <Input
-                        id="date"
-                        type="date"
-                        value={formData.date}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setFormData((prev: CreateRevenueRequest) => ({
-                            ...prev,
-                            date: e.target.value,
-                          }))
-                        }
-                        className="pl-10"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
+                <DialogTrigger
+                  onClick={() => handleOpenDialog()}
+                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-slate-900 text-slate-50 shadow hover:bg-slate-900/90 h-9 px-4 py-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Revenue Data
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingItem ? "Edit Revenue Data" : "Add Revenue Data"}
+                    </DialogTitle>
+                    <DialogDescription>
+                      Enter the revenue details for a specific date
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="posRevenue">POS Revenue</Label>
+                      <Label htmlFor="date">Date</Label>
                       <div className="relative">
-                        <DollarSign className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                        <Calendar className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
                         <Input
-                          id="posRevenue"
-                          type="number"
-                          value={formData.posRevenue}
+                          id="date"
+                          type="date"
+                          value={formData.date}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                             setFormData((prev: CreateRevenueRequest) => ({
                               ...prev,
-                              posRevenue: parseFloat(e.target.value),
+                              date: e.target.value,
                             }))
                           }
                           className="pl-10"
@@ -330,150 +333,181 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="eatclubRevenue">Eatclub Revenue</Label>
-                      <div className="relative">
-                        <DollarSign className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="posRevenue">POS Revenue</Label>
+                        <div className="relative">
+                          <DollarSign className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                          <Input
+                            id="posRevenue"
+                            type="number"
+                            value={formData.posRevenue}
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
+                              setFormData((prev: CreateRevenueRequest) => ({
+                                ...prev,
+                                posRevenue: parseFloat(e.target.value),
+                              }))
+                            }
+                            className="pl-10"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="eatclubRevenue">Eatclub Revenue</Label>
+                        <div className="relative">
+                          <DollarSign className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                          <Input
+                            id="eatclubRevenue"
+                            type="number"
+                            value={formData.eatclubRevenue}
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
+                              setFormData((prev: CreateRevenueRequest) => ({
+                                ...prev,
+                                eatclubRevenue: parseFloat(e.target.value),
+                              }))
+                            }
+                            className="pl-10"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="labourCosts">Labour Costs</Label>
+                        <div className="relative">
+                          <DollarSign className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                          <Input
+                            id="labourCosts"
+                            type="number"
+                            value={formData.labourCosts}
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
+                              setFormData((prev: CreateRevenueRequest) => ({
+                                ...prev,
+                                labourCosts: parseFloat(e.target.value),
+                              }))
+                            }
+                            className="pl-10"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="totalCovers">Total Covers</Label>
                         <Input
-                          id="eatclubRevenue"
+                          id="totalCovers"
                           type="number"
-                          value={formData.eatclubRevenue}
+                          value={formData.totalCovers}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                             setFormData((prev: CreateRevenueRequest) => ({
                               ...prev,
-                              eatclubRevenue: parseFloat(e.target.value),
+                              totalCovers: parseInt(e.target.value),
                             }))
                           }
-                          className="pl-10"
                           required
                         />
                       </div>
                     </div>
 
+                    {/* Events Section */}
                     <div className="space-y-2">
-                      <Label htmlFor="labourCosts">Labour Costs</Label>
-                      <div className="relative">
-                        <DollarSign className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                      <Label>Events (Optional)</Label>
+                      <div className="flex gap-2">
                         <Input
-                          id="labourCosts"
-                          type="number"
-                          value={formData.labourCosts}
+                          placeholder="Event name"
+                          value={eventInput.name}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setFormData((prev: CreateRevenueRequest) => ({
+                            setEventInput((prev) => ({
                               ...prev,
-                              labourCosts: parseFloat(e.target.value),
+                              name: e.target.value,
                             }))
                           }
-                          className="pl-10"
-                          required
                         />
+                        <select
+                          value={eventInput.impact}
+                          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                            setEventInput((prev) => ({
+                              ...prev,
+                              impact: e.target.value as "positive" | "negative",
+                            }))
+                          }
+                          className="border border-slate-200 rounded-md px-3 py-2 text-sm"
+                        >
+                          <option value="positive">Positive</option>
+                          <option value="negative">Negative</option>
+                        </select>
+                        <Button
+                          type="button"
+                          onClick={handleAddEvent}
+                          size="sm"
+                        >
+                          Add
+                        </Button>
                       </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="totalCovers">Total Covers</Label>
-                      <Input
-                        id="totalCovers"
-                        type="number"
-                        value={formData.totalCovers}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setFormData((prev: CreateRevenueRequest) => ({
-                            ...prev,
-                            totalCovers: parseInt(e.target.value),
-                          }))
-                        }
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Events Section */}
-                  <div className="space-y-2">
-                    <Label>Events (Optional)</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Event name"
-                        value={eventInput.name}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setEventInput((prev) => ({
-                            ...prev,
-                            name: e.target.value,
-                          }))
-                        }
-                      />
-                      <select
-                        value={eventInput.impact}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                          setEventInput((prev) => ({
-                            ...prev,
-                            impact: e.target.value as "positive" | "negative",
-                          }))
-                        }
-                        className="border border-slate-200 rounded-md px-3 py-2 text-sm"
-                      >
-                        <option value="positive">Positive</option>
-                        <option value="negative">Negative</option>
-                      </select>
-                      <Button type="button" onClick={handleAddEvent} size="sm">
-                        Add
-                      </Button>
-                    </div>
-                    {formData.events && formData.events.length > 0 && (
-                      <div className="space-y-1 mt-2">
-                        {formData.events.map(
-                          (
-                            event: {
-                              name: string;
-                              impact: "positive" | "negative";
-                            },
-                            index: number
-                          ) => (
-                            <div
-                              key={index}
-                              className="flex items-center justify-between bg-slate-50 p-2 rounded"
-                            >
-                              <span className="text-sm">
-                                {event.name}{" "}
-                                <span
-                                  className={`text-xs ${
-                                    event.impact === "positive"
-                                      ? "text-green-600"
-                                      : "text-red-600"
-                                  }`}
-                                >
-                                  ({event.impact})
-                                </span>
-                              </span>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleRemoveEvent(index)}
+                      {formData.events && formData.events.length > 0 && (
+                        <div className="space-y-1 mt-2">
+                          {formData.events.map(
+                            (
+                              event: {
+                                name: string;
+                                impact: "positive" | "negative";
+                              },
+                              index: number
+                            ) => (
+                              <div
+                                key={index}
+                                className="flex items-center justify-between bg-slate-50 p-2 rounded"
                               >
-                                <Trash2 className="w-3 h-3" />
-                              </Button>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    )}
-                  </div>
+                                <span className="text-sm">
+                                  {event.name}{" "}
+                                  <span
+                                    className={`text-xs ${
+                                      event.impact === "positive"
+                                        ? "text-green-600"
+                                        : "text-red-600"
+                                    }`}
+                                  >
+                                    ({event.impact})
+                                  </span>
+                                </span>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleRemoveEvent(index)}
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      )}
+                    </div>
 
-                  <DialogFooter>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setDialogOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit">
-                      {editingItem ? "Update" : "Create"}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
+                    <DialogFooter>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setDialogOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button type="submit">
+                        {editingItem ? "Update" : "Create"}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
 
@@ -560,20 +594,24 @@ export default function AdminDashboardPage() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between">
               <div className="text-sm text-slate-600">
-                Showing {((currentPage - 1) * pageSize) + 1} to{" "}
+                Showing {(currentPage - 1) * pageSize + 1} to{" "}
                 {Math.min(currentPage * pageSize, totalRecords)} of{" "}
                 {totalRecords} results
               </div>
-              
+
               <Pagination>
                 <PaginationContent>
-                  <PaginationItem>
+                  <PaginationItem className="mr-5">
                     <PaginationPrevious
                       onClick={() => handlePageChange(currentPage - 1)}
-                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      className={
+                        currentPage === 1
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }
                     />
                   </PaginationItem>
-                  
+
                   {/* Page Numbers */}
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     let pageNum;
@@ -586,7 +624,7 @@ export default function AdminDashboardPage() {
                     } else {
                       pageNum = currentPage - 2 + i;
                     }
-                    
+
                     return (
                       <PaginationItem key={pageNum}>
                         <PaginationLink
@@ -599,17 +637,21 @@ export default function AdminDashboardPage() {
                       </PaginationItem>
                     );
                   })}
-                  
+
                   {totalPages > 5 && currentPage < totalPages - 2 && (
                     <PaginationItem>
                       <PaginationEllipsis />
                     </PaginationItem>
                   )}
-                  
+
                   <PaginationItem>
                     <PaginationNext
                       onClick={() => handlePageChange(currentPage + 1)}
-                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      className={`${
+                        currentPage === totalPages
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      } ml-5`}
                     />
                   </PaginationItem>
                 </PaginationContent>

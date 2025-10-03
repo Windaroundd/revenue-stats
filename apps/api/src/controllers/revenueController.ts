@@ -37,6 +37,10 @@ export const createRevenueData = async (
     const { date, posRevenue, eatclubRevenue, labourCosts, totalCovers, events } =
       req.body;
 
+    // Debug: Log received data
+    console.log("Received request body:", req.body);
+    console.log("Events received:", events);
+
     const dateObj = new Date(date);
     const weekNumber = getWeekNumber(dateObj);
     const dayOfWeek = getDayOfWeek(dateObj);
