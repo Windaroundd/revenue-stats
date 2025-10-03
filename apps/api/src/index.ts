@@ -2,11 +2,15 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
 
 import { connectToDatabase } from "./config/database";
 import { errorHandler } from "./middleware/errorHandler";
 import { notFoundHandler } from "./middleware/notFound";
-import userRoutes from "./routes/userRoutes";
+import { swaggerSpec } from "./config/swagger";
+import authRoutes from "./routes/authRoutes";
+import revenueRoutes from "./routes/revenueRoutes";
+import analyticsRoutes from "./routes/analyticsRoutes";
 
 const app = express();
 
@@ -15,13 +19,27 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
 
+// Swagger API Documentation
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: "Restaurant Revenue API Docs",
+}));
+
+// Swagger JSON endpoint
+app.get("/api-docs.json", (_req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
+
 // Health check
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
 // API routes
-app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/admin/revenue", revenueRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 // 404 and error handler
 app.use(notFoundHandler);
@@ -34,6 +52,8 @@ async function startServer() {
   app.listen(PORT, () => {
     // eslint-disable-next-line no-console
     console.log(`API server listening on http://localhost:${PORT}`);
+    // eslint-disable-next-line no-console
+    console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
   });
 }
 
