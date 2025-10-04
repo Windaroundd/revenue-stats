@@ -124,7 +124,7 @@ export default function AdminLoginPage() {
 
         <div className="mt-6 text-center text-sm text-slate-400">
           <p>Demo credentials:</p>
-          <p className="font-mono mt-1">admin@example.com / admin123</p>
+          <p className="font-mono mt-1">admin@restaurant.com / admin123</p>
         </div>
       </div>
     </div>
