@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platform: linux/amd64 # Build for VPS architecture
+    ports:
+      - "3214:3214"
+    environment:
+      - NODE_ENV=production
+      - PORT=3214
+      # MongoDB Atlas connection - must be provided via environment
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:3214/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Note: Using MongoDB Atlas cloud database
+  # Local MongoDB service removed since we're using Atlas
