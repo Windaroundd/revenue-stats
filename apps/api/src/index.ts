@@ -19,11 +19,30 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
 
+// Serve static files for Swagger UI
+app.use(
+  express.static("node_modules/swagger-ui-dist", {
+    index: false,
+    setHeaders: (res) => {
+      res.setHeader("Content-Type", "text/html");
+    },
+  })
+);
+
 // Swagger API Documentation
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: "Restaurant Revenue API Docs",
-}));
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customCss: ".swagger-ui .topbar { display: none }",
+    customSiteTitle: "Restaurant Revenue API Docs",
+    explorer: true,
+    swaggerOptions: {
+      persistAuthorization: true,
+      displayRequestDuration: true,
+    },
+  })
+);
 
 // Swagger JSON endpoint
 app.get("/api-docs.json", (_req, res) => {
@@ -53,7 +72,9 @@ async function startServer() {
     // eslint-disable-next-line no-console
     console.log(`API server listening on http://localhost:${PORT}`);
     // eslint-disable-next-line no-console
-    console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
+    console.log(
+      `API Documentation available at http://localhost:${PORT}/api-docs`
+    );
   });
 }
 

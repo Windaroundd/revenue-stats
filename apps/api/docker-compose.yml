@@ -16,18 +16,6 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
     restart: unless-stopped
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "require('http').get('http://localhost:3214/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
   # Note: Using MongoDB Atlas cloud database
   # Local MongoDB service removed since we're using Atlas

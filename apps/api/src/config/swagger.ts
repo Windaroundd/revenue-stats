@@ -17,6 +17,20 @@ const options: swaggerJsdoc.Options = {
         url: "http://localhost:3214",
         description: "Development server",
       },
+      {
+        url: "http://{server}:{port}",
+        description: "Production server",
+        variables: {
+          server: {
+            default: "localhost",
+            description: "Server hostname or IP",
+          },
+          port: {
+            default: "3214",
+            description: "Server port",
+          },
+        },
+      },
     ],
     components: {
       securitySchemes: {
@@ -40,7 +54,13 @@ const options: swaggerJsdoc.Options = {
         },
         RevenueData: {
           type: "object",
-          required: ["date", "posRevenue", "eatclubRevenue", "labourCosts", "totalCovers"],
+          required: [
+            "date",
+            "posRevenue",
+            "eatclubRevenue",
+            "labourCosts",
+            "totalCovers",
+          ],
           properties: {
             _id: { type: "string", example: "507f1f77bcf86cd799439011" },
             date: { type: "string", format: "date", example: "2025-10-03" },
@@ -96,11 +116,19 @@ const options: swaggerJsdoc.Options = {
     },
     tags: [
       { name: "Authentication", description: "Admin authentication endpoints" },
-      { name: "Revenue Management", description: "Revenue data CRUD operations (Admin only)" },
+      {
+        name: "Revenue Management",
+        description: "Revenue data CRUD operations (Admin only)",
+      },
       { name: "Analytics", description: "Public analytics and statistics" },
     ],
   },
-  apis: ["./src/routes/*.ts"],
+  apis: [
+    "./src/routes/*.ts",
+    "./dist/routes/*.js",
+    "./routes/*.ts",
+    "./routes/*.js",
+  ],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);
