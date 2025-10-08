@@ -333,15 +333,7 @@ export default function RevenuePage() {
                           : "text-red-600"
                       }`}
                     >
-                      <span
-                        className={`text-base font-medium flex items-center gap-1 ${
-                          comparison.totalRevenueChange >= 0
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        ({formatPercentage(comparison.averagePerDayChange)})
-                      </span>
+                      ({formatPercentage(comparison.averagePerDayChange)})
                     </span>
                   </div>
                 )}
@@ -368,15 +360,7 @@ export default function RevenuePage() {
                           : "text-red-600"
                       }`}
                     >
-                      <span
-                        className={`text-base font-medium flex items-center gap-1 ${
-                          comparison.totalRevenueChange >= 0
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        ({formatPercentage(comparison.totalCoversChange)})
-                      </span>
+                      ({formatPercentage(comparison.totalCoversChange)})
                     </span>
                   </div>
                 )}
