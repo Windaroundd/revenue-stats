@@ -389,64 +389,62 @@ export default function RevenuePage() {
                 <Legend content={<CustomLegend />} />
 
                 {/* Current Week Bars */}
-                {visibleSeries.posRevenue && (
-                  <Bar
-                    dataKey="posRevenue"
-                    name="POS Revenue (Current)"
-                    fill="#0f172a"
-                    stackId={showComparison ? "current" : "main"}
-                    radius={[0, 0, 0, 0]}
-                  />
-                )}
-                {visibleSeries.eatclubRevenue && (
-                  <Bar
-                    dataKey="eatclubRevenue"
-                    name="Eatclub Revenue (Current)"
-                    fill="#6366f1"
-                    stackId={showComparison ? "current" : "main"}
-                    radius={[4, 4, 0, 0]}
-                  />
-                )}
-                {visibleSeries.labourCosts && (
-                  <Bar
-                    dataKey="labourCosts"
-                    name="Labour Costs (Current)"
-                    fill="#f97316"
-                    stackId="costs"
-                    radius={[4, 4, 0, 0]}
-                  />
-                )}
+
+                <Bar
+                  dataKey="posRevenue"
+                  name="POS Revenue (Current)"
+                  fill="#0f172a"
+                  stackId={showComparison ? "current" : "main"}
+                  radius={[0, 0, 0, 0]}
+                  hide={!visibleSeries.posRevenue}
+                />
+
+                <Bar
+                  dataKey="eatclubRevenue"
+                  name="Eatclub Revenue (Current)"
+                  fill="#6366f1"
+                  stackId={showComparison ? "current" : "main"}
+                  radius={[4, 4, 0, 0]}
+                  hide={!visibleSeries.eatclubRevenue}
+                />
+                <Bar
+                  dataKey="labourCosts"
+                  name="Labour Costs (Current)"
+                  fill="#f97316"
+                  stackId="costs"
+                  radius={[4, 4, 0, 0]}
+                  hide={!visibleSeries.labourCosts}
+                />
 
                 {/* Previous Week Bars */}
                 {showComparison && data.previousWeek && (
                   <>
-                    {visibleSeries.posRevenue && (
-                      <Bar
-                        dataKey="posRevenuePrev"
-                        name="Direct Revenue (Previous)"
-                        fill="#94a3b8"
-                        stackId="previous"
-                        radius={[0, 0, 0, 0]}
-                      />
-                    )}
-                    {visibleSeries.eatclubRevenue && (
-                      <Bar
-                        dataKey="eatclubRevenuePrev"
-                        name="Total Revenue (Previous)"
-                        fill="#c7d2fe"
-                        stackId="previous"
-                        radius={[4, 4, 0, 0]}
-                      />
-                    )}
-                    {visibleSeries.labourCosts && (
-                      <Bar
-                        dataKey="labourCostsPrev"
-                        name="Labour Costs (Previous)"
-                        fill="#fed7aa"
-                        stackId="costsPrev"
-                        radius={[4, 4, 0, 0]}
-                      />
-                    )}
+                    <Bar
+                      dataKey="posRevenuePrev"
+                      name="Direct Revenue (Previous)"
+                      fill="#94a3b8"
+                      stackId="previous"
+                      radius={[0, 0, 0, 0]}
+                      hide={!visibleSeries.posRevenue}
+                    />
+
+                    <Bar
+                      dataKey="eatclubRevenuePrev"
+                      name="Total Revenue (Previous)"
+                      fill="#c7d2fe"
+                      stackId="previous"
+                      radius={[4, 4, 0, 0]}
+                      hide={!visibleSeries.eatclubRevenue}
+                    />
+
+                    <Bar
+                      dataKey="labourCostsPrev"
+                      name="Labour Costs (Previous)"
+                      fill="#fed7aa"
+                      stackId="costsPrev"
+                      radius={[4, 4, 0, 0]}
+                      hide={!visibleSeries.labourCosts}
+                    />
                   </>
                 )}
               </BarChart>

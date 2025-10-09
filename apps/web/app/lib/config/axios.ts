@@ -3,7 +3,7 @@ import { API_BASE_URL, API_CONFIG } from "../constants/api";
 
 export const createAxiosInstance = (): AxiosInstance => {
   return axios.create({
-    baseURL: `${API_BASE_URL}/api`,
+    baseURL: `${API_BASE_URL}`,
     timeout: API_CONFIG.TIMEOUT,
     headers: API_CONFIG.HEADERS,
   });
